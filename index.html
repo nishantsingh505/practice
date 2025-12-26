@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Master | Tense Challenge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- New Home Screen -->
+        <div id="home-screen" class="home-screen">
+            <header class="app-header home-header">
+                <h1>Grammar Master</h1>
+                <p class="subtitle">Select an exercise to begin</p>
+            </header>
+
+            <div class="exercise-grid" id="exercise-grid">
+                <!-- Exercises injected here -->
+            </div>
+        </div>
+
+        <!-- Game Area (Initial hidden) -->
+        <main id="game-area" class="game-area hidden">
+            <header class="app-header">
+                <h1>Grammar Master</h1>
+                <div class="stats-container">
+                    <div class="stat-box">
+                        <span class="stat-label">Score</span>
+                        <span class="stat-value" id="score">0</span>
+                    </div>
+                    <div class="progress-ring" id="progress-container">
+                        <span id="question-count">1 / 30</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="card question-card" id="question-card">
+                <h2 class="instruction-text">Identify the Tense</h2>
+                <p class="sentence-text" id="sentence">Loading...</p>
+            </div>
+
+            <div class="options-grid" id="options-container">
+                <!-- Options will be injected here -->
+            </div>
+
+            <div class="feedback-message" id="feedback"></div>
+
+            <button id="next-btn" class="next-btn hidden">Next Question</button>
+        </main>
+    </div>
+
+    <!-- Final Score Modal -->
+    <div id="game-over-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Assessment Complete!</h2>
+            <div class="final-score-display">
+                <span id="final-score">0</span>
+                <span class="total-score">/ 300</span>
+            </div>
+            <p id="performance-text">Great job!</p>
+            <div class="modal-actions">
+                <button id="restart-btn" class="primary-btn">Try Again</button>
+                <button id="home-btn" class="secondary-btn">Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
