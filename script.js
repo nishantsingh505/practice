@@ -44,7 +44,7 @@ function getRandomItem(arr) {
 }
 
 function constructSentence(sub, verb, tense) {
-    const isPlural = ["We", "They", "The students", "The team"].includes(sub) || sub === "You"; // treating You as plural context usually
+    const isPlural = ["We", "They", "The students", "The team"].includes(sub) || sub === "You";
     const isFirstPerson = sub === "I";
     const isThirdPerson = !isPlural && !isFirstPerson;
 
@@ -70,7 +70,7 @@ function constructSentence(sub, verb, tense) {
             vPhrase = verb.past;
             break;
         case "Past Continuous":
-            const was = isPlural || sub === "You" ? "were" : "was"; // 'You' uses were
+            const was = isPlural || sub === "You" ? "were" : "was";
             vPhrase = `${was} ${verb.ing}`;
             break;
         case "Past Perfect":
@@ -93,44 +93,36 @@ function constructSentence(sub, verb, tense) {
             break;
     }
 
-    // Contexts to make sentences natural
     const contexts = [
         "every day", "right now", "already", "yesterday", "when he called", "by next year",
         "for ten years", "tomorrow", "before they arrived", "next week", "last night",
         "since morning", "at this moment", "recently", "in 2020", "at 5 PM"
     ];
 
-    // Simple logic to pick a somewhat logical context (not strict grammar checking here, focusing on form identification)
     const context = getRandomItem(contexts);
 
     return {
-        sentence: `${sub} <strong>${vPhrase}</strong> ${context}.`, // Bold the verb phrase
+        sentence: `${sub} <strong>${vPhrase}</strong> ${context}.`,
         tense: tense,
-        text: `${sub} ${vPhrase} ${context}.` // Plain text for uniqueness
+        text: `${sub} ${vPhrase} ${context}.`
     };
 }
 
 function generateUniqueQuestions(totalNeeded) {
     const generatedSet = new Set();
     const questions = [];
-
-    // We try to generate until we have enough
     let safetyCounter = 0;
 
     while (questions.length < totalNeeded && safetyCounter < 10000) {
         safetyCounter++;
-
         const sub = getRandomItem(PRONOUNS);
         const verb = getRandomItem(VERBS);
-        // Balance tenses: cycle through them or random
-        const tense = TENSES[questions.length % TENSES.length]; // cycling ensures even distribution
+        const tense = TENSES[questions.length % TENSES.length];
 
         const result = constructSentence(sub, verb, tense);
 
         if (!generatedSet.has(result.text)) {
             generatedSet.add(result.text);
-
-            // Generate options
             const distractors = TENSES
                 .filter(t => t !== tense)
                 .sort(() => 0.5 - Math.random())
@@ -138,21 +130,17 @@ function generateUniqueQuestions(totalNeeded) {
             const options = [tense, ...distractors].sort(() => 0.5 - Math.random());
 
             questions.push({
-                sentence: result.sentence, // HTML
+                sentence: result.sentence,
                 tense: tense,
                 options: options
             });
         }
     }
-
-    // Shuffle the entire master list so exercises aren't just cycled tenses
     return questions.sort(() => Math.random() - 0.5);
 }
 
-// Generate 300 unique questions total for 10 exercises
 const MASTER_QUESTION_LIST = generateUniqueQuestions(300);
 
-// Distribute to exercises
 const exercises = [];
 for (let i = 0; i < 10; i++) {
     exercises.push({
@@ -168,18 +156,23 @@ for (let i = 0; i < 10; i++) {
 let currentExerciseIndex = -1;
 let currentQuestionIndex = 0;
 let score = 0;
-const scorePerQuestion = 10;
+let streak = 0; // New: Streak tracking
+const baseScore = 10;
 let isAnswered = false;
+let audioCtx = null; // New: Web Audio Context
 
 // --- DOM Elements ---
 const homeScreen = document.getElementById('home-screen');
-const gameArea = document.getElementById('game-area'); // Main game wrapper
+const gameArea = document.getElementById('game-area');
 const exerciseGrid = document.getElementById('exercise-grid');
 
 const sentenceEl = document.getElementById('sentence');
 const optionsContainer = document.getElementById('options-container');
 const scoreEl = document.getElementById('score');
+const streakContainer = document.getElementById('streak-container');
+const streakCountEl = document.getElementById('streak-count');
 const questionCountEl = document.getElementById('question-count');
+const progressContainer = document.getElementById('progress-container');
 const nextBtn = document.getElementById('next-btn');
 const feedbackEl = document.getElementById('feedback');
 const gameOverModal = document.getElementById('game-over-modal');
@@ -188,10 +181,101 @@ const performanceTextEl = document.getElementById('performance-text');
 const restartBtn = document.getElementById('restart-btn');
 const homeBtn = document.getElementById('home-btn');
 
-// --- Initialization ---
+// --- Audio System ---
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+function playSound(type) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+
+    if (type === 'correct') {
+        // High ping
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+    } else if (type === 'wrong') {
+        // Low buzz
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+    } else if (type === 'win') {
+        // Major chord arpeggio
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.frequency.value = freq;
+            const start = now + i * 0.1;
+            g.gain.setValueAtTime(0.2, start);
+            g.gain.exponentialRampToValueAtTime(0.01, start + 0.5);
+            o.start(start);
+            o.stop(start + 0.5);
+        });
+    }
+}
+
+// --- Visual Effects ---
+function createParticles(x, y) {
+    for (let i = 0; i < 20; i++) {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        p.style.background = `hsl(${Math.random() * 360}, 80%, 60%)`;
+
+        // Random destination
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 50 + Math.random() * 100;
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity;
+
+        p.style.setProperty('--tx', `${tx}px`);
+        p.style.setProperty('--ty', `${ty}px`);
+
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 800);
+    }
+}
+
+function showFloatingScore(amount, x, y) {
+    const el = document.createElement('div');
+    el.classList.add('floating-text');
+    el.textContent = `+${amount} XP`;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+}
+
+// --- App Logic ---
 
 function initApp() {
+    // Inject progress bar element
+    progressContainer.innerHTML = `
+        <div class="progress-fill" id="progress-fill"></div>
+        <span id="question-count">1 / 30</span>
+    `;
     renderHome();
+
+    // Init Audio on first interaction
+    document.body.addEventListener('click', initAudio, { once: true });
 }
 
 function renderHome() {
@@ -206,7 +290,7 @@ function renderHome() {
         card.classList.add('exercise-card');
         if (ex.completed) card.classList.add('completed');
 
-        const statusText = ex.completed ? `Best: ${ex.bestScore}` : 'Start';
+        const statusText = ex.completed ? `Best: ${ex.bestScore} XP` : 'Start';
 
         card.innerHTML = `
             <h3>${ex.title}</h3>
@@ -222,11 +306,9 @@ function startExercise(index) {
     currentExerciseIndex = index;
     currentQuestionIndex = 0;
     score = 0;
+    streak = 0;
+    streakContainer.classList.add('hidden');
     scoreEl.textContent = '0';
-
-    // Shuffle current exercise questions for this attempt
-    // (Optional: if we want static questions per exercise, remove sort)
-    // exercises[index].questions.sort(() => Math.random() - 0.5); 
 
     homeScreen.classList.add('hidden');
     gameArea.classList.remove('hidden');
@@ -242,36 +324,57 @@ function loadQuestion() {
     const currentData = currentList[currentQuestionIndex];
 
     // Update Progress
-    questionCountEl.textContent = `${currentQuestionIndex + 1} / ${currentList.length}`;
+    const progressPercent = ((currentQuestionIndex) / currentList.length) * 100;
+    document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+    document.getElementById('question-count').textContent = `${currentQuestionIndex + 1} / ${currentList.length}`;
 
-    // Render Sentence
     sentenceEl.innerHTML = currentData.sentence;
-
-    // Render Options
     optionsContainer.innerHTML = '';
 
     currentData.options.forEach(optionText => {
         const btn = document.createElement('button');
         btn.classList.add('option-btn');
         btn.textContent = optionText;
-        btn.onclick = () => checkAnswer(btn, optionText, currentData.tense);
+        btn.onclick = (e) => checkAnswer(btn, optionText, currentData.tense, e);
         optionsContainer.appendChild(btn);
     });
 }
 
-function checkAnswer(selectedBtn, selectedOption, correctOption) {
+function checkAnswer(selectedBtn, selectedOption, correctOption, event) {
     if (isAnswered) return;
     isAnswered = true;
 
     const allButtons = optionsContainer.querySelectorAll('.option-btn');
+    const rect = selectedBtn.getBoundingClientRect();
+    const midX = rect.left + rect.width / 2;
+    const midY = rect.top + rect.height / 2;
 
     if (selectedOption === correctOption) {
-        score += scorePerQuestion;
+        // Correct
+        streak++;
+        playSound('correct');
+        createParticles(midX, midY);
+
+        // Multiplier Logic
+        let multiplier = 1;
+        if (streak >= 3) multiplier = 1.2;
+        if (streak >= 5) multiplier = 1.5;
+        if (streak >= 10) multiplier = 2;
+
+        const points = Math.ceil(baseScore * multiplier);
+        score += points;
         scoreEl.textContent = score;
+
+        showFloatingScore(points, midX, midY - 50);
+
         selectedBtn.classList.add('correct');
         feedbackEl.style.color = 'var(--success)';
         feedbackEl.textContent = 'Correct!';
+
     } else {
+        // Wrong
+        streak = 0;
+        playSound('wrong');
         selectedBtn.classList.add('wrong');
         feedbackEl.style.color = 'var(--error)';
         feedbackEl.textContent = 'Oops! Incorrect.';
@@ -281,6 +384,16 @@ function checkAnswer(selectedBtn, selectedOption, correctOption) {
                 btn.classList.add('correct');
             }
         });
+    }
+
+    // Update Streak UI
+    if (streak > 0) {
+        streakContainer.classList.remove('hidden');
+        streakCountEl.textContent = streak;
+        streakCountEl.parentElement.classList.add('streak-active');
+    } else {
+        streakContainer.classList.add('hidden');
+        streakCountEl.parentElement.classList.remove('streak-active');
     }
 
     allButtons.forEach(btn => btn.disabled = true);
@@ -306,17 +419,17 @@ function endGame() {
     }
 
     finalScoreEl.textContent = score;
-    const totalPossible = currentEx.questions.length * scorePerQuestion;
-    const percentage = (score / totalPossible) * 100;
+    playSound('win');
 
-    if (percentage === 100) {
-        performanceTextEl.textContent = "Perfect! You're a Grammar Master! 🏆";
-    } else if (percentage >= 80) {
-        performanceTextEl.textContent = "Great job! Very impressive. 🌟";
-    } else if (percentage >= 50) {
-        performanceTextEl.textContent = "Good effort! Keep practicing. 📚";
+    // Calculate stars roughly
+    const percentage = (score / (currentEx.questions.length * baseScore * 1.5)) * 100; // Adjusted for multiplier
+
+    if (percentage >= 80) {
+        performanceTextEl.textContent = "Legendary! 🏆 You are a Grammar God!";
+    } else if (percentage >= 60) {
+        performanceTextEl.textContent = "Awesome! 🌟 Great streak!";
     } else {
-        performanceTextEl.textContent = "Don't give up! Try again. 💪";
+        performanceTextEl.textContent = "Good practice! 💪 Keep it up.";
     }
 
     gameOverModal.classList.remove('hidden');
@@ -326,7 +439,6 @@ function endGame() {
 nextBtn.addEventListener('click', handleNext);
 
 restartBtn.addEventListener('click', () => {
-    // Reattempt current exercise
     startExercise(currentExerciseIndex);
 });
 

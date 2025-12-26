@@ -483,6 +483,123 @@ body {
 
 .secondary-btn:hover {
     background: rgba(255, 255, 255, 0.05);
-    color: var(--text-main);
-    border-color: var(--text-muted);
+}
+
+/* --- Gamification Styles --- */
+
+/* Streak Box */
+.streak-box {
+    margin-top: 0.5rem;
+}
+
+.streak-value {
+    color: #fca5a5;
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.streak-active {
+    animation: streakPulse 1.5s infinite;
+}
+
+@keyframes streakPulse {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+        filter: brightness(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+}
+
+/* Floating Text (Score Popups) */
+.floating-text {
+    position: absolute;
+    color: var(--success);
+    font-weight: 800;
+    font-size: 1.5rem;
+    pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+    z-index: 50;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.5);
+    }
+
+    50% {
+        transform: translateY(-30px) scale(1.2);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(1);
+    }
+}
+
+/* Particle Effects (Confetti) */
+.particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particlePop 0.8s ease-out forwards;
+    z-index: 40;
+}
+
+@keyframes particlePop {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Updated Progress Bar */
+.progress-ring {
+    background: rgba(255, 255, 255, 0.1);
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    min-width: 100px;
+}
+
+.progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    width: 0%;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+#question-count {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    text-align: center;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
