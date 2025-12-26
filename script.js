@@ -1,58 +1,164 @@
 // --- Data Generation ---
 
+const TITLES = ["Mr.", "Mrs.", "Ms.", "Dr.", "Prof."];
+const NAMES = ["Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson"];
+const PRONOUNS = ["I", "You", "He", "She", "We", "They", "The students", "The teacher", "My friend", "The team"];
+
+// Verbs with forms: [base, past, pastParticiple, presentParticiple, 3rdPersonSingular]
+const VERBS = [
+    { base: "walk", past: "walked", pp: "walked", ing: "walking", s: "walks" },
+    { base: "play", past: "played", pp: "played", ing: "playing", s: "plays" },
+    { base: "work", past: "worked", pp: "worked", ing: "working", s: "works" },
+    { base: "study", past: "studied", pp: "studied", ing: "studying", s: "studies" },
+    { base: "eat", past: "ate", pp: "eaten", ing: "eating", s: "eats" },
+    { base: "go", past: "went", pp: "gone", ing: "going", s: "goes" },
+    { base: "write", past: "wrote", pp: "written", ing: "writing", s: "writes" },
+    { base: "read", past: "read", pp: "read", ing: "reading", s: "reads" },
+    { base: "run", past: "ran", pp: "run", ing: "running", s: "runs" },
+    { base: "speak", past: "spoke", pp: "spoken", ing: "speaking", s: "speaks" },
+    { base: "drive", past: "drove", pp: "driven", ing: "driving", s: "drives" },
+    { base: "fly", past: "flew", pp: "flown", ing: "flying", s: "flies" },
+    { base: "swim", past: "swam", pp: "swum", ing: "swimming", s: "swims" },
+    { base: "sing", past: "sang", pp: "sung", ing: "singing", s: "sings" },
+    { base: "sleep", past: "slept", pp: "slept", ing: "sleeping", s: "sleeps" },
+    { base: "cook", past: "cooked", pp: "cooked", ing: "cooking", s: "cooks" },
+    { base: "clean", past: "cleaned", pp: "cleaned", ing: "cleaning", s: "cleans" },
+    { base: "paint", past: "painted", pp: "painted", ing: "painting", s: "paints" },
+    { base: "wait", past: "waited", pp: "waited", ing: "waiting", s: "waits" },
+    { base: "teach", past: "taught", pp: "taught", ing: "teaching", s: "teaches" },
+    { base: "learn", past: "learned", pp: "learned", ing: "learning", s: "learns" },
+    { base: "watch", past: "watched", pp: "watched", ing: "watching", s: "watches" },
+    { base: "listen", past: "listened", pp: "listened", ing: "listening", s: "listens" },
+    { base: "buy", past: "bought", pp: "bought", ing: "buying", s: "buys" },
+    { base: "sell", past: "sold", pp: "sold", ing: "selling", s: "sells" }
+];
+
 const TENSES = [
     "Simple Present", "Present Continuous", "Present Perfect", "Present Perfect Continuous",
     "Simple Past", "Past Continuous", "Past Perfect", "Past Perfect Continuous",
     "Future Simple", "Future Continuous", "Future Perfect", "Future Perfect Continuous"
 ];
 
-const TEMPLATES = [
-    { text: "She [VERB] to school every day.", answer: "Simple Present", verb: "walks" },
-    { text: "They [VERB] football right now.", answer: "Present Continuous", verb: "are playing" },
-    { text: "I [VERB] my homework already.", answer: "Present Perfect", verb: "have finished" },
-    { text: "We [VERB] to the cinema yesterday.", answer: "Simple Past", verb: "went" },
-    { text: "She [VERB] a book when he called.", answer: "Past Continuous", verb: "was reading" },
-    { text: "By next year, I [VERB] graduated.", answer: "Future Perfect", verb: "will have graduated" },
-    { text: "He [VERB] here for ten years.", answer: "Present Perfect Continuous", verb: "has been working" },
-    { text: "They [VERB] at 5 PM tomorrow.", answer: "Future Simple", verb: "will arrive" },
-    { text: "I [VERB] before they arrived.", answer: "Past Perfect", verb: "had left" },
-    { text: "She [VERB] to France next week.", answer: "Future (going to)", verb: "is going to travel" },
-    { text: "It [VERB] heavily last night.", answer: "Simple Past", verb: "rained" },
-    { text: "We [VERB] for the bus for 20 minutes.", answer: "Present Perfect Continuous", verb: "have been waiting" },
-    { text: "I [VERB] my keys.", answer: "Present Perfect", verb: "have lost" },
-    { text: "Look! It [VERB] again.", answer: "Present Continuous", verb: "is snowing" },
-    { text: "Water [VERB] at 100 degrees Celsius.", answer: "Simple Present", verb: "boils" }
-];
-
-function generateQuestions(count) {
-    const questions = [];
-    for (let i = 0; i < count; i++) {
-        const template = TEMPLATES[Math.floor(Math.random() * TEMPLATES.length)];
-
-        // Generate distractors
-        const distractors = TENSES
-            .filter(t => t !== template.answer)
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 3);
-
-        const options = [template.answer, ...distractors].sort(() => 0.5 - Math.random());
-
-        questions.push({
-            sentence: template.text.replace("[VERB]", `<strong>${template.verb}</strong>`),
-            tense: template.answer,
-            options: options
-        });
-    }
-    return questions;
+function getRandomItem(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// Generate 10 Exercises with 30 Questions each
+function constructSentence(sub, verb, tense) {
+    const isPlural = ["We", "They", "The students", "The team"].includes(sub) || sub === "You"; // treating You as plural context usually
+    const isFirstPerson = sub === "I";
+    const isThirdPerson = !isPlural && !isFirstPerson;
+
+    let vPhrase = "";
+
+    switch (tense) {
+        case "Simple Present":
+            vPhrase = (isThirdPerson) ? verb.s : verb.base;
+            break;
+        case "Present Continuous":
+            const be = isFirstPerson ? "am" : (isPlural ? "are" : "is");
+            vPhrase = `${be} ${verb.ing}`;
+            break;
+        case "Present Perfect":
+            const have = isThirdPerson ? "has" : "have";
+            vPhrase = `${have} ${verb.pp}`;
+            break;
+        case "Present Perfect Continuous":
+            const haveBeen = isThirdPerson ? "has been" : "have been";
+            vPhrase = `${haveBeen} ${verb.ing}`;
+            break;
+        case "Simple Past":
+            vPhrase = verb.past;
+            break;
+        case "Past Continuous":
+            const was = isPlural || sub === "You" ? "were" : "was"; // 'You' uses were
+            vPhrase = `${was} ${verb.ing}`;
+            break;
+        case "Past Perfect":
+            vPhrase = `had ${verb.pp}`;
+            break;
+        case "Past Perfect Continuous":
+            vPhrase = `had been ${verb.ing}`;
+            break;
+        case "Future Simple":
+            vPhrase = `will ${verb.base}`;
+            break;
+        case "Future Continuous":
+            vPhrase = `will be ${verb.ing}`;
+            break;
+        case "Future Perfect":
+            vPhrase = `will have ${verb.pp}`;
+            break;
+        case "Future Perfect Continuous":
+            vPhrase = `will have been ${verb.ing}`;
+            break;
+    }
+
+    // Contexts to make sentences natural
+    const contexts = [
+        "every day", "right now", "already", "yesterday", "when he called", "by next year",
+        "for ten years", "tomorrow", "before they arrived", "next week", "last night",
+        "since morning", "at this moment", "recently", "in 2020", "at 5 PM"
+    ];
+
+    // Simple logic to pick a somewhat logical context (not strict grammar checking here, focusing on form identification)
+    const context = getRandomItem(contexts);
+
+    return {
+        sentence: `${sub} <strong>${vPhrase}</strong> ${context}.`, // Bold the verb phrase
+        tense: tense,
+        text: `${sub} ${vPhrase} ${context}.` // Plain text for uniqueness
+    };
+}
+
+function generateUniqueQuestions(totalNeeded) {
+    const generatedSet = new Set();
+    const questions = [];
+
+    // We try to generate until we have enough
+    let safetyCounter = 0;
+
+    while (questions.length < totalNeeded && safetyCounter < 10000) {
+        safetyCounter++;
+
+        const sub = getRandomItem(PRONOUNS);
+        const verb = getRandomItem(VERBS);
+        // Balance tenses: cycle through them or random
+        const tense = TENSES[questions.length % TENSES.length]; // cycling ensures even distribution
+
+        const result = constructSentence(sub, verb, tense);
+
+        if (!generatedSet.has(result.text)) {
+            generatedSet.add(result.text);
+
+            // Generate options
+            const distractors = TENSES
+                .filter(t => t !== tense)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 3);
+            const options = [tense, ...distractors].sort(() => 0.5 - Math.random());
+
+            questions.push({
+                sentence: result.sentence, // HTML
+                tense: tense,
+                options: options
+            });
+        }
+    }
+
+    // Shuffle the entire master list so exercises aren't just cycled tenses
+    return questions.sort(() => Math.random() - 0.5);
+}
+
+// Generate 300 unique questions total for 10 exercises
+const MASTER_QUESTION_LIST = generateUniqueQuestions(300);
+
+// Distribute to exercises
 const exercises = [];
-for (let i = 1; i <= 10; i++) {
+for (let i = 0; i < 10; i++) {
     exercises.push({
-        id: i,
-        title: `Exercise ${i}`,
-        questions: generateQuestions(30),
+        id: i + 1,
+        title: `Exercise ${i + 1}`,
+        questions: MASTER_QUESTION_LIST.slice(i * 30, (i + 1) * 30),
         completed: false,
         bestScore: 0
     });
