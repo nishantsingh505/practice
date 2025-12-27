@@ -104,7 +104,9 @@ function constructSentence(sub, verb, tense) {
     return {
         sentence: `${sub} <strong>${vPhrase}</strong> ${context}.`,
         tense: tense,
-        text: `${sub} ${vPhrase} ${context}.`
+        text: `${sub} ${vPhrase} ${context}.`,
+        vPhrase: vPhrase,
+        rawSentence: `${sub} %BLANK% ${context}.`
     };
 }
 
@@ -139,27 +141,87 @@ function generateUniqueQuestions(totalNeeded) {
     return questions.sort(() => Math.random() - 0.5);
 }
 
-const MASTER_QUESTION_LIST = generateUniqueQuestions(300);
+const MASTER_IDENTIFY_LIST = generateUniqueQuestions(300);
 
-const exercises = [];
+function generateFillBlanksQuestions(totalNeeded) {
+    const questions = [];
+    const generatedSet = new Set();
+    let safetyCounter = 0;
+
+    while (questions.length < totalNeeded && safetyCounter < 10000) {
+        safetyCounter++;
+        const sub = getRandomItem(PRONOUNS);
+        const verb = getRandomItem(VERBS);
+        const tense = TENSES[questions.length % TENSES.length]; // Rotation ensures even spread
+
+        const result = constructSentence(sub, verb, tense);
+        const uniqueKey = `${result.text}-FILL`;
+
+        if (!generatedSet.has(uniqueKey)) {
+            generatedSet.add(uniqueKey);
+
+            // Create distractors (same verb, different tenses)
+            const distractorTenses = TENSES
+                .filter(t => t !== tense)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 3);
+
+            const options = [result.vPhrase];
+            distractorTenses.forEach(dt => {
+                options.push(constructSentence(sub, verb, dt).vPhrase);
+            });
+
+            questions.push({
+                sentence: result.rawSentence.replace('%BLANK%', '_______'),
+                correctAnswer: result.vPhrase,
+                options: options.sort(() => 0.5 - Math.random()),
+                instruction: `Fill in the blank (${tense})`,
+                type: 'fill'
+            });
+        }
+    }
+    return questions.sort(() => Math.random() - 0.5);
+}
+
+const MASTER_FILL_LIST = generateFillBlanksQuestions(150);
+
+const identifyExercises = [];
 for (let i = 0; i < 10; i++) {
-    exercises.push({
-        id: i + 1,
+    identifyExercises.push({
+        id: `id-${i + 1}`,
         title: `Exercise ${i + 1}`,
-        questions: MASTER_QUESTION_LIST.slice(i * 30, (i + 1) * 30),
+        questions: MASTER_IDENTIFY_LIST.slice(i * 30, (i + 1) * 30).map(q => ({
+            ...q,
+            correctAnswer: q.tense, // Standardize correctness check
+            instruction: 'Identify the Tense',
+            type: 'identify'
+        })),
+        completed: false,
+        bestScore: 0
+    });
+}
+
+const fillExercises = [];
+for (let i = 0; i < 10; i++) {
+    fillExercises.push({
+        id: `fill-${i + 1}`,
+        title: `Fill Blanks ${i + 1}`,
+        questions: MASTER_FILL_LIST.slice(i * 15, (i + 1) * 15),
         completed: false,
         bestScore: 0
     });
 }
 
 // --- App State ---
+let currentMode = 'identify'; // 'identify' or 'fill'
+let currentExerciseList = identifyExercises;
 let currentExerciseIndex = -1;
 let currentQuestionIndex = 0;
 let score = 0;
-let streak = 0; // New: Streak tracking
+let streak = 0;
 const baseScore = 10;
 let isAnswered = false;
-let audioCtx = null; // New: Web Audio Context
+let audioCtx = null;
 
 // --- DOM Elements ---
 const homeScreen = document.getElementById('home-screen');
@@ -180,6 +242,7 @@ const finalScoreEl = document.getElementById('final-score');
 const performanceTextEl = document.getElementById('performance-text');
 const restartBtn = document.getElementById('restart-btn');
 const homeBtn = document.getElementById('home-btn');
+const tabBtns = document.querySelectorAll('.tab-btn');
 
 // --- Audio System ---
 function initAudio() {
@@ -274,6 +337,17 @@ function initApp() {
     `;
     renderHome();
 
+    // Tab Listeners
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentMode = btn.dataset.mode;
+            currentExerciseList = currentMode === 'identify' ? identifyExercises : fillExercises;
+            renderHome();
+        });
+    });
+
     // Init Audio on first interaction
     document.body.addEventListener('click', initAudio, { once: true });
 }
@@ -285,7 +359,7 @@ function renderHome() {
 
     exerciseGrid.innerHTML = '';
 
-    exercises.forEach((ex, index) => {
+    currentExerciseList.forEach((ex, index) => {
         const card = document.createElement('div');
         card.classList.add('exercise-card');
         if (ex.completed) card.classList.add('completed');
@@ -320,7 +394,7 @@ function loadQuestion() {
     nextBtn.classList.add('hidden');
     feedbackEl.textContent = '';
 
-    const currentList = exercises[currentExerciseIndex].questions;
+    const currentList = currentExerciseList[currentExerciseIndex].questions;
     const currentData = currentList[currentQuestionIndex];
 
     // Update Progress
@@ -329,13 +403,14 @@ function loadQuestion() {
     document.getElementById('question-count').textContent = `${currentQuestionIndex + 1} / ${currentList.length}`;
 
     sentenceEl.innerHTML = currentData.sentence;
+    document.querySelector('.instruction-text').textContent = currentData.instruction;
     optionsContainer.innerHTML = '';
 
     currentData.options.forEach(optionText => {
         const btn = document.createElement('button');
         btn.classList.add('option-btn');
         btn.textContent = optionText;
-        btn.onclick = (e) => checkAnswer(btn, optionText, currentData.tense, e);
+        btn.onclick = (e) => checkAnswer(btn, optionText, currentData.correctAnswer, e);
         optionsContainer.appendChild(btn);
     });
 }
@@ -401,7 +476,7 @@ function checkAnswer(selectedBtn, selectedOption, correctOption, event) {
 }
 
 function handleNext() {
-    const currentList = exercises[currentExerciseIndex].questions;
+    const currentList = currentExerciseList[currentExerciseIndex].questions;
     currentQuestionIndex++;
 
     if (currentQuestionIndex < currentList.length) {
@@ -412,7 +487,7 @@ function handleNext() {
 }
 
 function endGame() {
-    const currentEx = exercises[currentExerciseIndex];
+    const currentEx = currentExerciseList[currentExerciseIndex];
     currentEx.completed = true;
     if (score > currentEx.bestScore) {
         currentEx.bestScore = score;
