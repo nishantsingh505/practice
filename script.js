@@ -2,7 +2,7 @@
 
 const TITLES = ["Mr.", "Mrs.", "Ms.", "Dr.", "Prof."];
 const NAMES = ["Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson"];
-const PRONOUNS = ["I", "You", "He", "She", "We", "They", "The students", "The teacher", "My friend", "The team"];
+const PRONOUNS = ["I", "You", "He", "She", "We", "They", "The students", "The teacher", "My friend", "The team", "My parents", "The dog", "Everyone", "Nobody", "The doctor", "Our neighbors", "The cat", "The birds"];
 
 // Verbs with forms: [base, past, pastParticiple, presentParticiple, 3rdPersonSingular]
 const VERBS = [
@@ -30,7 +30,38 @@ const VERBS = [
     { base: "watch", past: "watched", pp: "watched", ing: "watching", s: "watches" },
     { base: "listen", past: "listened", pp: "listened", ing: "listening", s: "listens" },
     { base: "buy", past: "bought", pp: "bought", ing: "buying", s: "buys" },
-    { base: "sell", past: "sold", pp: "sold", ing: "selling", s: "sells" }
+    { base: "sell", past: "sold", pp: "sold", ing: "selling", s: "sells" },
+    // New Verbs
+    { base: "drink", past: "drank", pp: "drunk", ing: "drinking", s: "drinks" },
+    { base: "break", past: "broke", pp: "broken", ing: "breaking", s: "breaks" },
+    { base: "meet", past: "met", pp: "met", ing: "meeting", s: "meets" },
+    { base: "win", past: "won", pp: "won", ing: "winning", s: "wins" },
+    { base: "build", past: "built", pp: "built", ing: "building", s: "builds" },
+    { base: "choose", past: "chose", pp: "chosen", ing: "choosing", s: "chooses" },
+    { base: "draw", past: "drew", pp: "drawn", ing: "drawing", s: "draws" },
+    { base: "grow", past: "grew", pp: "grown", ing: "growing", s: "grows" },
+    { base: "know", past: "knew", pp: "known", ing: "knowing", s: "knows" },
+    { base: "leave", past: "left", pp: "left", ing: "leaving", s: "leaves" },
+    { base: "pay", past: "paid", pp: "paid", ing: "paying", s: "pays" },
+    { base: "say", past: "said", pp: "said", ing: "saying", s: "says" },
+    { base: "see", past: "saw", pp: "seen", ing: "seeing", s: "sees" },
+    { base: "send", past: "sent", pp: "sent", ing: "sending", s: "sends" },
+    { base: "sit", past: "sat", pp: "sat", ing: "sitting", s: "sits" },
+    { base: "stand", past: "stood", pp: "stood", ing: "standing", s: "stands" },
+    { base: "take", past: "took", pp: "taken", ing: "taking", s: "takes" },
+    { base: "tell", past: "told", pp: "told", ing: "telling", s: "tells" },
+    { base: "think", past: "thought", pp: "thought", ing: "thinking", s: "thinks" },
+    { base: "wear", past: "wore", pp: "worn", ing: "wearing", s: "wears" },
+    { base: "begin", past: "began", pp: "begun", ing: "beginning", s: "begins" },
+    { base: "bring", past: "brought", pp: "brought", ing: "bringing", s: "brings" },
+    { base: "catch", past: "caught", pp: "caught", ing: "catching", s: "catches" },
+    { base: "come", past: "came", pp: "come", ing: "coming", s: "comes" },
+    { base: "do", past: "did", pp: "done", ing: "doing", s: "does" },
+    { base: "fall", past: "fell", pp: "fallen", ing: "falling", s: "falls" },
+    { base: "find", past: "found", pp: "found", ing: "finding", s: "finds" },
+    { base: "forget", past: "forgot", pp: "forgotten", ing: "forgetting", s: "forgets" },
+    { base: "give", past: "gave", pp: "given", ing: "giving", s: "gives" },
+    { base: "make", past: "made", pp: "made", ing: "making", s: "makes" }
 ];
 
 const TENSES = [
@@ -44,7 +75,7 @@ function getRandomItem(arr) {
 }
 
 function constructSentence(sub, verb, tense) {
-    const isPlural = ["We", "They", "The students", "The team"].includes(sub) || sub === "You";
+    const isPlural = ["We", "They", "The students", "The team", "My parents", "Our neighbors", "The birds", "Some people"].includes(sub) || sub === "You";
     const isFirstPerson = sub === "I";
     const isThirdPerson = !isPlural && !isFirstPerson;
 
@@ -96,7 +127,12 @@ function constructSentence(sub, verb, tense) {
     const contexts = [
         "every day", "right now", "already", "yesterday", "when he called", "by next year",
         "for ten years", "tomorrow", "before they arrived", "next week", "last night",
-        "since morning", "at this moment", "recently", "in 2020", "at 5 PM"
+        "since morning", "at this moment", "recently", "in 2020", "at 5 PM",
+        "usually", "sometimes", "rarely", "on Mondays", "in the evening",
+        "during the holiday", "after school", "before breakfast", "since 1990",
+        "for a long time", "until midnight", "in the future", "later today",
+        "a few minutes ago", "last Christmas", "next month", "every weekend",
+        "twice a week", "soon"
     ];
 
     const context = getRandomItem(contexts);
@@ -117,7 +153,14 @@ function generateUniqueQuestions(totalNeeded) {
 
     while (questions.length < totalNeeded && safetyCounter < 10000) {
         safetyCounter++;
-        const sub = getRandomItem(PRONOUNS);
+
+        let sub;
+        if (Math.random() < 0.25) {
+            sub = `${getRandomItem(TITLES)} ${getRandomItem(NAMES)}`;
+        } else {
+            sub = getRandomItem(PRONOUNS);
+        }
+
         const verb = getRandomItem(VERBS);
         const tense = TENSES[questions.length % TENSES.length];
 
@@ -141,7 +184,7 @@ function generateUniqueQuestions(totalNeeded) {
     return questions.sort(() => Math.random() - 0.5);
 }
 
-const MASTER_IDENTIFY_LIST = generateUniqueQuestions(300);
+const MASTER_IDENTIFY_LIST = generateUniqueQuestions(50);
 
 function generateFillBlanksQuestions(totalNeeded) {
     const questions = [];
@@ -150,7 +193,12 @@ function generateFillBlanksQuestions(totalNeeded) {
 
     while (questions.length < totalNeeded && safetyCounter < 10000) {
         safetyCounter++;
-        const sub = getRandomItem(PRONOUNS);
+        let sub;
+        if (Math.random() < 0.25) {
+            sub = `${getRandomItem(TITLES)} ${getRandomItem(NAMES)}`;
+        } else {
+            sub = getRandomItem(PRONOUNS);
+        }
         const verb = getRandomItem(VERBS);
         const tense = TENSES[questions.length % TENSES.length]; // Rotation ensures even spread
 
@@ -183,14 +231,14 @@ function generateFillBlanksQuestions(totalNeeded) {
     return questions.sort(() => Math.random() - 0.5);
 }
 
-const MASTER_FILL_LIST = generateFillBlanksQuestions(150);
+const MASTER_FILL_LIST = generateFillBlanksQuestions(50);
 
 const identifyExercises = [];
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 5; i++) {
     identifyExercises.push({
         id: `id-${i + 1}`,
         title: `Exercise ${i + 1}`,
-        questions: MASTER_IDENTIFY_LIST.slice(i * 30, (i + 1) * 30).map(q => ({
+        questions: MASTER_IDENTIFY_LIST.slice(i * 10, (i + 1) * 10).map(q => ({
             ...q,
             correctAnswer: q.tense, // Standardize correctness check
             instruction: 'Identify the Tense',
@@ -202,11 +250,11 @@ for (let i = 0; i < 10; i++) {
 }
 
 const fillExercises = [];
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 5; i++) {
     fillExercises.push({
         id: `fill-${i + 1}`,
         title: `Fill Blanks ${i + 1}`,
-        questions: MASTER_FILL_LIST.slice(i * 15, (i + 1) * 15),
+        questions: MASTER_FILL_LIST.slice(i * 10, (i + 1) * 10),
         completed: false,
         bestScore: 0
     });
@@ -243,6 +291,7 @@ const performanceTextEl = document.getElementById('performance-text');
 const restartBtn = document.getElementById('restart-btn');
 const homeBtn = document.getElementById('home-btn');
 const tabBtns = document.querySelectorAll('.tab-btn');
+const exerciseSelector = document.getElementById('exercise-selector');
 
 // --- Audio System ---
 function initAudio() {
@@ -327,6 +376,17 @@ function showFloatingScore(amount, x, y) {
     setTimeout(() => el.remove(), 1000);
 }
 
+function updateExerciseSelector() {
+    exerciseSelector.innerHTML = '';
+    currentExerciseList.forEach((ex, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = ex.title;
+        if (index === currentExerciseIndex) option.selected = true;
+        exerciseSelector.appendChild(option);
+    });
+}
+
 // --- App Logic ---
 
 function initApp() {
@@ -383,6 +443,8 @@ function startExercise(index) {
     streak = 0;
     streakContainer.classList.add('hidden');
     scoreEl.textContent = '0';
+
+    updateExerciseSelector(); // Update dropdown
 
     homeScreen.classList.add('hidden');
     gameArea.classList.remove('hidden');
@@ -519,6 +581,10 @@ restartBtn.addEventListener('click', () => {
 
 homeBtn.addEventListener('click', () => {
     renderHome();
+});
+
+exerciseSelector.addEventListener('change', (e) => {
+    startExercise(parseInt(e.target.value));
 });
 
 // Start App
