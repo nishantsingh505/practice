@@ -260,6 +260,136 @@ for (let i = 0; i < 5; i++) {
     });
 }
 
+// --- Voice Mode Data ---
+
+const TRANSITIVE_VERBS = [
+    { base: "eat", past: "ate", pp: "eaten", s: "eats", ing: "eating", objects: ["the apple", "lunch", "the cake", "pizza"] },
+    { base: "write", past: "wrote", pp: "written", s: "writes", ing: "writing", objects: ["a letter", "the report", "a book", "an email"] },
+    { base: "paint", past: "painted", pp: "painted", s: "paints", ing: "painting", objects: ["a portrait", "the wall", "a masterpiece", "the fence"] },
+    { base: "fix", past: "fixed", pp: "fixed", s: "fixes", ing: "fixing", objects: ["the car", "the computer", "the leak", "the bike"] },
+    { base: "clean", past: "cleaned", pp: "cleaned", s: "cleans", ing: "cleaning", objects: ["the room", "the house", "the windows", "the floor"] },
+    { base: "read", past: "read", pp: "read", s: "reads", ing: "reading", objects: ["the news", "a novel", "the instructions", "the signs"] },
+    { base: "call", past: "called", pp: "called", s: "calls", ing: "calling", objects: ["the doctor", "the police", "my mom", "the client"] },
+    { base: "watch", past: "watched", pp: "watched", s: "watches", ing: "watching", objects: ["a movie", "the show", "the birds", "the game"] },
+    { base: "build", past: "built", pp: "built", s: "builds", ing: "building", objects: ["a house", "a bridge", "a sandcastle", "a robot"] },
+    { base: "love", past: "loved", pp: "loved", s: "loves", ing: "loving", objects: ["the cat", "music", "pizza", "summer"] },
+    { base: "help", past: "helped", pp: "helped", s: "helps", ing: "helping", objects: ["the old lady", "the student", "the team", "me"] },
+    { base: "visit", past: "visited", pp: "visited", s: "visits", ing: "visiting", objects: ["Grandma", "Paris", "the museum", "the doctor"] }
+];
+
+function constructVoiceSentence(sub, verb, obj, tense, isPassive) {
+    const isPluralSub = ["We", "They", "The students", "The team", "My parents", "Our neighbors", "The birds", "Some people"].includes(sub) || sub === "You";
+    // For passive, the 'Subject' of the sentence is actually the 'Object' of the action.
+    // So we need to check if the new subject (the original object) is singular or plural.
+    // Simplifying: Most objects here are singular (the apple, a letter).
+    // Let's assume singular for generated objects unless specified.
+    const isPluralObj = false; // "the apple" is singular.
+
+    let vPhrase = "";
+
+    // Active Construction
+    if (!isPassive) {
+        switch (tense) {
+            case "Simple Present": vPhrase = (!isPluralSub && sub !== "I") ? verb.s : verb.base; break;
+            case "Simple Past": vPhrase = verb.past; break;
+            case "Future Simple": vPhrase = `will ${verb.base}`; break;
+            case "Present Perfect": vPhrase = `${(!isPluralSub && sub !== "I") ? "has" : "have"} ${verb.pp}`; break;
+        }
+        return `${sub} ${vPhrase} ${obj}.`;
+    }
+
+    // Passive Construction
+    else {
+        // Obj becomes the subject. 'obj' strings like "the apple" are already lowercase except generally not proper nouns in this set.
+        // Capitalize first letter of new subject.
+        let newSub = obj.charAt(0).toUpperCase() + obj.slice(1);
+
+        let be = "";
+        switch (tense) {
+            case "Simple Present": be = "is"; break; // Assuming singular obj
+            case "Simple Past": be = "was"; break; // Assuming singular obj
+            case "Future Simple": be = "will be"; break;
+            case "Present Perfect": be = "has been"; break;
+        }
+
+        let agent = sub;
+        if (["I", "We", "They", "He", "She"].includes(sub)) {
+            const map = { "I": "me", "We": "us", "They": "them", "He": "him", "She": "her" };
+            agent = map[sub];
+        } else if (sub === "You") {
+            agent = "you";
+        } else {
+            // Check if it's a generated Name (starts with Title)
+            const startsWithTitle = TITLES.some(t => sub.startsWith(t));
+            if (!startsWithTitle) {
+                // Lowercase the first letter for common nouns like "The dog" -> "the dog"
+                agent = sub.charAt(0).toLowerCase() + sub.slice(1);
+            }
+        }
+
+        return `${newSub} ${be} ${verb.pp} by ${agent}.`;
+    }
+}
+
+function generateVoiceQuestions(totalNeeded) {
+    const questions = [];
+    const used = new Set();
+    let safety = 0;
+
+    while (questions.length < totalNeeded && safety < 5000) {
+        safety++;
+        let sub = Math.random() < 0.3 ? `${getRandomItem(TITLES)} ${getRandomItem(NAMES)}` : getRandomItem(PRONOUNS);
+        const verb = getRandomItem(TRANSITIVE_VERBS);
+        const obj = getRandomItem(verb.objects);
+        const tense = getRandomItem(["Simple Present", "Simple Past", "Future Simple", "Present Perfect"]);
+        const isPassive = Math.random() < 0.5;
+
+        const sentence = constructVoiceSentence(sub, verb, obj, tense, isPassive);
+
+        if (!used.has(sentence)) {
+            used.add(sentence);
+
+            // Type 1: Identify Active vs Passive
+            if (Math.random() < 0.6) {
+                questions.push({
+                    sentence: sentence,
+                    correctAnswer: isPassive ? "Passive Voice" : "Active Voice",
+                    options: ["Active Voice", "Passive Voice"],
+                    instruction: "Identify the Voice (Active or Passive?)",
+                    type: "voice_id"
+                });
+            } else {
+                // Type 2: Convert
+                // If currently active, options are correct Passive + wrong Passives
+                const correct = isPassive ? constructVoiceSentence(sub, verb, obj, tense, false) : constructVoiceSentence(sub, verb, obj, tense, true);
+                const wrongTense = tense === "Simple Past" ? "Future Simple" : "Simple Past"; // Simple distractor logic
+                const wrong1 = isPassive ? constructVoiceSentence(sub, verb, obj, wrongTense, false) : constructVoiceSentence(sub, verb, obj, wrongTense, true);
+
+                questions.push({
+                    sentence: `Convert to ${isPassive ? 'Active' : 'Passive'}:<br>"${sentence}"`,
+                    correctAnswer: correct,
+                    options: [correct, wrong1].sort(() => 0.5 - Math.random()),
+                    instruction: `Convert to ${isPassive ? 'Active' : 'Passive'}`,
+                    type: "voice_convert"
+                });
+            }
+        }
+    }
+    return questions;
+}
+
+const MASTER_VOICE_LIST = generateVoiceQuestions(100);
+const voiceExercises = [];
+for (let i = 0; i < 10; i++) {
+    voiceExercises.push({
+        id: `voice-${i + 1}`,
+        title: `Voice Challenge ${i + 1}`,
+        questions: MASTER_VOICE_LIST.slice(i * 10, (i + 1) * 10),
+        completed: false,
+        bestScore: 0
+    });
+}
+
 // --- App State ---
 let currentMode = 'identify'; // 'identify' or 'fill'
 let currentExerciseList = identifyExercises;
@@ -403,7 +533,11 @@ function initApp() {
             tabBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentMode = btn.dataset.mode;
-            currentExerciseList = currentMode === 'identify' ? identifyExercises : fillExercises;
+
+            if (currentMode === 'identify') currentExerciseList = identifyExercises;
+            else if (currentMode === 'fill') currentExerciseList = fillExercises;
+            else if (currentMode === 'voice') currentExerciseList = voiceExercises;
+
             renderHome();
         });
     });
