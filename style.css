@@ -638,3 +638,96 @@ body {
     letter-spacing: 0.05em;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
+
+/* --- Mobile Optimizations --- */
+@media (max-width: 600px) {
+    .app-container {
+        width: 95%;
+        padding: 1.5rem;
+        min-height: 80vh;
+        /* Better for mobile viewports */
+        border-radius: 16px;
+    }
+
+    .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .app-header h1 {
+        font-size: 1.25rem;
+    }
+
+    .stats-container {
+        width: 100%;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .stat-box {
+        align-items: center;
+        /* Center align on mobile */
+    }
+
+    .stat-label {
+        font-size: 0.65rem;
+    }
+
+    .stat-value {
+        font-size: 1rem;
+    }
+
+    .progress-ring {
+        min-width: 80px;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .mode-tabs {
+        flex-wrap: wrap;
+        /* Allow wrapping if needed */
+        gap: 0.5rem;
+    }
+
+    .tab-btn {
+        padding: 0.6rem 0.5rem;
+        font-size: 0.9rem;
+        flex: 1 1 auto;
+        /* Allow shrink/grow */
+        text-align: center;
+    }
+
+    .sentence-text {
+        font-size: 1.35rem;
+        /* Smaller text for questions to prevent scrolling */
+    }
+
+    .options-grid {
+        gap: 0.75rem;
+    }
+
+    .option-btn {
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+
+    .exercise-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        /* Slightly smaller definition */
+        gap: 1rem;
+    }
+
+    .game-area {
+        gap: 1.5rem;
+    }
+
+    /* Ensure modal doesn't overflow */
+    .modal-content {
+        padding: 2rem 1.5rem;
+        width: 95%;
+    }
+
+    .final-score-display {
+        font-size: 3rem;
+    }
+}
