@@ -792,8 +792,338 @@ for (let i = 0; i < GRAMMAR_TRANSLATION_EXERCISE_COUNT; i++) {
     });
 }
 
+// --- Modal Verbs Mode Data ---
+
+const MODAL_FUNCTIONS = [
+    "Ability",
+    "Permission",
+    "Obligation",
+    "Advice",
+    "Possibility",
+    "Request",
+    "Prediction",
+    "Prohibition",
+    "Offer",
+    "Deduction",
+    "Lack of Necessity"
+];
+
+const MODAL_FUNCTION_OPTION_COUNT = 4;
+
+function buildModalFunctionOptions(correct) {
+    const distractors = shuffleArray(
+        MODAL_FUNCTIONS.filter(option => option !== correct)
+    ).slice(0, MODAL_FUNCTION_OPTION_COUNT - 1);
+
+    return shuffleArray([correct, ...distractors]);
+}
+
+const MODAL_FILL_QUESTIONS = [
+    {
+        sentence: "You ______ wear a helmet on this site. (rule)",
+        correctAnswer: "must",
+        options: shuffleArray(["must", "should", "might", "could"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "I ______ swim across the river when I was ten.",
+        correctAnswer: "could",
+        options: shuffleArray(["could", "can", "might", "should"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "We ______ leave now or we'll miss the train.",
+        correctAnswer: "have to",
+        options: shuffleArray(["have to", "should", "may", "could"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "______ I borrow your charger for a minute?",
+        correctAnswer: "may",
+        options: shuffleArray(["may", "must", "should", "will"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "She ______ be at home; her car is outside.",
+        correctAnswer: "must",
+        options: shuffleArray(["must", "might", "could", "may"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "He ______ come to the meeting; he's stuck in traffic.",
+        correctAnswer: "might",
+        options: shuffleArray(["might", "must", "should", "will"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "You ______ see a dentist; that tooth looks bad.",
+        correctAnswer: "should",
+        options: shuffleArray(["should", "must", "can", "might"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "If you want to improve, you ______ practice daily.",
+        correctAnswer: "need to",
+        options: shuffleArray(["need to", "may", "might", "could"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "When I was younger, I ______ run five miles without stopping.",
+        correctAnswer: "could",
+        options: shuffleArray(["could", "can", "will", "must"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "You ______ park here; it's private.",
+        correctAnswer: "must not",
+        options: shuffleArray(["must not", "don't have to", "should", "could"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "______ you please open the window?",
+        correctAnswer: "could",
+        options: shuffleArray(["could", "may", "must", "might"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "He ______ call you later tonight.",
+        correctAnswer: "will",
+        options: shuffleArray(["will", "might", "should", "could"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "According to the schedule, they ______ arrive around noon.",
+        correctAnswer: "should",
+        options: shuffleArray(["should", "might", "must", "can"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "We ______ finish this today; it's a tight deadline.",
+        correctAnswer: "have to",
+        options: shuffleArray(["have to", "might", "could", "should"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "I ______ rather stay in tonight.",
+        correctAnswer: "would",
+        options: shuffleArray(["would", "should", "might", "can"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "______ we start the meeting?",
+        correctAnswer: "shall",
+        options: shuffleArray(["shall", "should", "may", "could"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "You ______ apologize; it was your fault.",
+        correctAnswer: "ought to",
+        options: shuffleArray(["ought to", "could", "might", "will"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "She ______ speak three languages.",
+        correctAnswer: "can",
+        options: shuffleArray(["can", "must", "might", "should"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "It ______ rain this afternoon; take an umbrella.",
+        correctAnswer: "might",
+        options: shuffleArray(["might", "must", "will", "can"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "______ you mind waiting here for a moment?",
+        correctAnswer: "would",
+        options: shuffleArray(["would", "should", "might", "can"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "You ______ use your ID to enter the building.",
+        correctAnswer: "must",
+        options: shuffleArray(["must", "may", "might", "could"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "The package ______ arrive tomorrow.",
+        correctAnswer: "may",
+        options: shuffleArray(["may", "must", "should", "can"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "You ______ bring a gift; it's not required.",
+        correctAnswer: "don't have to",
+        options: shuffleArray(["don't have to", "must not", "should", "may"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    },
+    {
+        sentence: "You ______ have told me earlier.",
+        correctAnswer: "should have",
+        options: shuffleArray(["should have", "must have", "could have", "might have"]),
+        instruction: "Choose the correct modal",
+        type: "modal_fill"
+    }
+];
+
+const MODAL_FUNCTION_QUESTIONS = [
+    {
+        sentence: "She <strong>can</strong> type very fast.",
+        correctAnswer: "Ability",
+        options: buildModalFunctionOptions("Ability"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "<strong>May</strong> I sit here?",
+        correctAnswer: "Permission",
+        options: buildModalFunctionOptions("Permission"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "You <strong>must</strong> submit the report by Friday.",
+        correctAnswer: "Obligation",
+        options: buildModalFunctionOptions("Obligation"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "You <strong>should</strong> get some rest.",
+        correctAnswer: "Advice",
+        options: buildModalFunctionOptions("Advice"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "It <strong>might</strong> snow tonight.",
+        correctAnswer: "Possibility",
+        options: buildModalFunctionOptions("Possibility"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "<strong>Could</strong> you pass the salt?",
+        correctAnswer: "Request",
+        options: buildModalFunctionOptions("Request"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "It <strong>will</strong> get dark by six.",
+        correctAnswer: "Prediction",
+        options: buildModalFunctionOptions("Prediction"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "You <strong>must not</strong> use your phone during the exam.",
+        correctAnswer: "Prohibition",
+        options: buildModalFunctionOptions("Prohibition"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "<strong>Shall</strong> I carry your bag?",
+        correctAnswer: "Offer",
+        options: buildModalFunctionOptions("Offer"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "He <strong>must</strong> be at work; his lights are on.",
+        correctAnswer: "Deduction",
+        options: buildModalFunctionOptions("Deduction"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "You <strong>don't have to</strong> attend the meeting.",
+        correctAnswer: "Lack of Necessity",
+        options: buildModalFunctionOptions("Lack of Necessity"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "<strong>Would</strong> you like some tea?",
+        correctAnswer: "Offer",
+        options: buildModalFunctionOptions("Offer"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "She <strong>could</strong> speak French when she was a child.",
+        correctAnswer: "Ability",
+        options: buildModalFunctionOptions("Ability"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "You <strong>may</strong> leave early today.",
+        correctAnswer: "Permission",
+        options: buildModalFunctionOptions("Permission"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "We <strong>should</strong> arrive by noon.",
+        correctAnswer: "Prediction",
+        options: buildModalFunctionOptions("Prediction"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    },
+    {
+        sentence: "They <strong>might</strong> be late because of traffic.",
+        correctAnswer: "Possibility",
+        options: buildModalFunctionOptions("Possibility"),
+        instruction: "Identify the modal function",
+        type: "modal_function"
+    }
+];
+
+const MODAL_QUESTION_BANK = [...MODAL_FILL_QUESTIONS, ...MODAL_FUNCTION_QUESTIONS];
+const MODAL_EXERCISE_COUNT = 4;
+const MODAL_QUESTIONS_PER_EXERCISE = 10;
+
+const modalExercises = [];
+const modalQuestionPool = shuffleArray(MODAL_QUESTION_BANK);
+
+for (let i = 0; i < MODAL_EXERCISE_COUNT; i++) {
+    const start = i * MODAL_QUESTIONS_PER_EXERCISE;
+    modalExercises.push({
+        id: `modal-${i + 1}`,
+        title: `Modal Verbs ${i + 1}`,
+        questions: modalQuestionPool.slice(start, start + MODAL_QUESTIONS_PER_EXERCISE),
+        completed: false,
+        bestScore: 0
+    });
+}
+
 // --- App State ---
-let currentMode = 'identify'; // 'identify', 'fill', 'voice', 'translate', or 'grammar'
+let currentMode = 'identify'; // 'identify', 'fill', 'voice', 'translate', 'grammar', or 'modals'
 let currentExerciseList = identifyExercises;
 let currentExerciseIndex = -1;
 let currentQuestionIndex = 0;
@@ -941,6 +1271,7 @@ function initApp() {
             else if (currentMode === 'voice') currentExerciseList = voiceExercises;
             else if (currentMode === 'translate') currentExerciseList = translationExercises;
             else if (currentMode === 'grammar') currentExerciseList = grammarTranslationExercises;
+            else if (currentMode === 'modals') currentExerciseList = modalExercises;
 
             renderHome();
         });
