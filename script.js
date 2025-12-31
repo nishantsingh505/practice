@@ -607,8 +607,193 @@ for (let i = 0; i < TRANSLATION_EXERCISE_COUNT; i++) {
     });
 }
 
+// --- Translation + Grammar Mode Data ---
+
+const GRAMMAR_TRANSLATION_DIFFICULTY = "Extra Hard";
+const GRAMMAR_TENSES = [
+    "Simple Present",
+    "Present Continuous",
+    "Present Perfect",
+    "Simple Past",
+    "Future Simple"
+];
+const GRAMMAR_VOICES = ["Active Voice", "Passive Voice"];
+
+const GRAMMAR_TRANSLATION_PAIRS = [
+    { hi: "मैं बाजार जा रहा हूँ।", en: "I am going to the market.", tense: "Present Continuous", voice: "Active Voice" },
+    { hi: "वह एक किताब पढ़ रही है।", en: "She is reading a book.", tense: "Present Continuous", voice: "Active Voice" },
+    { hi: "वे पार्क में खेल रहे हैं।", en: "They are playing in the park.", tense: "Present Continuous", voice: "Active Voice" },
+    { hi: "बच्चा सो रहा है।", en: "The baby is sleeping.", tense: "Present Continuous", voice: "Active Voice" },
+    { hi: "वह बस का इंतज़ार कर रही है।", en: "She is waiting for the bus.", tense: "Present Continuous", voice: "Active Voice" },
+    { hi: "वह फोटो खींच रहा है।", en: "He is taking a photo.", tense: "Present Continuous", voice: "Active Voice" },
+    { hi: "सूरज पूर्व से उगता है।", en: "The sun rises in the east.", tense: "Simple Present", voice: "Active Voice" },
+    { hi: "मुझे चाय पसंद है।", en: "I like tea.", tense: "Simple Present", voice: "Active Voice" },
+    { hi: "मेरा भाई मुंबई में रहता है।", en: "My brother lives in Mumbai.", tense: "Simple Present", voice: "Active Voice" },
+    { hi: "दुकान नौ बजे खुलती है।", en: "The shop opens at nine.", tense: "Simple Present", voice: "Active Voice" },
+    { hi: "वह रोज़ सुबह दौड़ता है।", en: "He runs every morning.", tense: "Simple Present", voice: "Active Voice" },
+    { hi: "उसने अपना गृहकार्य पूरा कर लिया है।", en: "He has finished his homework.", tense: "Present Perfect", voice: "Active Voice" },
+    { hi: "मैंने अपनी चाबियाँ खो दी हैं।", en: "I have lost my keys.", tense: "Present Perfect", voice: "Active Voice" },
+    { hi: "हमने टिकट पहले ही खरीद लिए हैं।", en: "We have already bought the tickets.", tense: "Present Perfect", voice: "Active Voice" },
+    { hi: "वह कल स्कूल गई थी।", en: "She went to school yesterday.", tense: "Simple Past", voice: "Active Voice" },
+    { hi: "उसने दरवाजा खोल दिया।", en: "He opened the door.", tense: "Simple Past", voice: "Active Voice" },
+    { hi: "मैंने कक्षा में सवाल पूछा।", en: "I asked a question in class.", tense: "Simple Past", voice: "Active Voice" },
+    { hi: "हम कल मिलेंगे।", en: "We will meet tomorrow.", tense: "Future Simple", voice: "Active Voice" },
+    { hi: "ट्रेन प्लेटफॉर्म नंबर तीन पर आएगी।", en: "The train will arrive at platform three.", tense: "Future Simple", voice: "Active Voice" },
+    { hi: "हम रविवार को यात्रा करेंगे।", en: "We will travel on Sunday.", tense: "Future Simple", voice: "Active Voice" },
+    { hi: "चिट्ठी उसके द्वारा लिखी जा रही है।", en: "The letter is being written by her.", tense: "Present Continuous", voice: "Passive Voice" },
+    { hi: "रिपोर्ट टीम द्वारा तैयार की जा रही है।", en: "The report is being prepared by the team.", tense: "Present Continuous", voice: "Passive Voice" },
+    { hi: "कंप्यूटर उनके द्वारा ठीक किया जा रहा है।", en: "The computer is being fixed by them.", tense: "Present Continuous", voice: "Passive Voice" },
+    { hi: "दरवाजा उनके द्वारा बंद किया जाता है।", en: "The door is closed by them.", tense: "Simple Present", voice: "Passive Voice" },
+    { hi: "यह पत्र उसके द्वारा लिखा जाता है।", en: "This letter is written by him.", tense: "Simple Present", voice: "Passive Voice" },
+    { hi: "गृहकार्य उसके द्वारा पूरा किया जा चुका है।", en: "The homework has been finished by him.", tense: "Present Perfect", voice: "Passive Voice" },
+    { hi: "टिकट उसके द्वारा खरीदे गए हैं।", en: "The tickets have been bought by him.", tense: "Present Perfect", voice: "Passive Voice" },
+    { hi: "केक बच्चे द्वारा खाया गया।", en: "The cake was eaten by the child.", tense: "Simple Past", voice: "Passive Voice" },
+    { hi: "खिड़की उसके द्वारा खोली गई।", en: "The window was opened by her.", tense: "Simple Past", voice: "Passive Voice" },
+    { hi: "पुल मजदूरों द्वारा बनाया जाएगा।", en: "The bridge will be built by the workers.", tense: "Future Simple", voice: "Passive Voice" }
+];
+
+function shuffleArray(arr) {
+    return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function buildGrammarTranslationOptions(pairs, isHiToEn, correct, tense, voice) {
+    const optionCount = Math.max(3, TRANSLATION_OPTION_COUNT - 1);
+    const sameTenseVoice = pairs.filter(pair => pair.tense === tense && pair.voice === voice);
+    const sameTense = pairs.filter(pair => pair.tense === tense);
+    const sameVoice = pairs.filter(pair => pair.voice === voice);
+    const neededPairs = optionCount + 1;
+
+    let candidatePairs = sameTenseVoice;
+    if (candidatePairs.length < neededPairs) candidatePairs = sameTense;
+    if (candidatePairs.length < neededPairs) candidatePairs = sameVoice;
+    if (candidatePairs.length < neededPairs) candidatePairs = pairs;
+
+    return buildTranslationOptions(candidatePairs, isHiToEn, correct);
+}
+
+function createGrammarTranslationQuestion(pair, isHiToEn, pairs) {
+    const prompt = isHiToEn ? pair.hi : pair.en;
+    const correct = isHiToEn ? pair.en : pair.hi;
+    const direction = isHiToEn ? "English" : "Hindi";
+
+    return {
+        sentence: prompt,
+        correctAnswer: correct,
+        options: buildGrammarTranslationOptions(pairs, isHiToEn, correct, pair.tense, pair.voice),
+        instruction: `Translate to ${direction} (${pair.tense}, ${pair.voice})`,
+        type: "grammar_translate"
+    };
+}
+
+function createGrammarTenseQuestion(pair, useHindiPrompt) {
+    const prompt = useHindiPrompt ? pair.hi : pair.en;
+    const target = useHindiPrompt ? "English translation" : "sentence";
+
+    return {
+        sentence: prompt,
+        correctAnswer: pair.tense,
+        options: GRAMMAR_TENSES,
+        instruction: `Identify the tense of the ${target}`,
+        type: "grammar_tense"
+    };
+}
+
+function createGrammarVoiceQuestion(pair, useHindiPrompt) {
+    const prompt = useHindiPrompt ? pair.hi : pair.en;
+    const target = useHindiPrompt ? "English translation" : "sentence";
+
+    return {
+        sentence: prompt,
+        correctAnswer: pair.voice,
+        options: GRAMMAR_VOICES,
+        instruction: `Identify the voice of the ${target}`,
+        type: "grammar_voice"
+    };
+}
+
+function pickUniquePair(list, cursor, used) {
+    if (!list.length) return null;
+    let attempts = 0;
+
+    while (attempts < list.length) {
+        const pair = list[cursor.value % list.length];
+        cursor.value += 1;
+        const key = pair.en;
+
+        if (!used.has(key)) {
+            used.add(key);
+            return pair;
+        }
+        attempts += 1;
+    }
+
+    return list[(cursor.value - 1 + list.length) % list.length];
+}
+
+const GRAMMAR_TRANSLATION_EXERCISE_COUNT = 6;
+const GRAMMAR_TRANSLATION_QUESTIONS_PER_EXERCISE = 10;
+
+const grammarTranslationExercises = [];
+const grammarAllPairs = shuffleArray(GRAMMAR_TRANSLATION_PAIRS);
+const grammarActivePairs = shuffleArray(GRAMMAR_TRANSLATION_PAIRS.filter(pair => pair.voice === "Active Voice"));
+const grammarPassivePairs = shuffleArray(GRAMMAR_TRANSLATION_PAIRS.filter(pair => pair.voice === "Passive Voice"));
+const grammarAllCursor = { value: 0 };
+const grammarActiveCursor = { value: 0 };
+const grammarPassiveCursor = { value: 0 };
+const grammarTensePools = {};
+const grammarTenseCursors = {};
+
+GRAMMAR_TENSES.forEach(tense => {
+    grammarTensePools[tense] = shuffleArray(GRAMMAR_TRANSLATION_PAIRS.filter(pair => pair.tense === tense));
+    grammarTenseCursors[tense] = { value: 0 };
+});
+
+for (let i = 0; i < GRAMMAR_TRANSLATION_EXERCISE_COUNT; i++) {
+    const used = new Set();
+    const questions = [];
+
+    const transPairs = [
+        pickUniquePair(grammarAllPairs, grammarAllCursor, used),
+        pickUniquePair(grammarAllPairs, grammarAllCursor, used),
+        pickUniquePair(grammarAllPairs, grammarAllCursor, used),
+        pickUniquePair(grammarAllPairs, grammarAllCursor, used)
+    ].filter(Boolean);
+
+    if (transPairs[0]) questions.push(createGrammarTranslationQuestion(transPairs[0], true, GRAMMAR_TRANSLATION_PAIRS));
+    if (transPairs[1]) questions.push(createGrammarTranslationQuestion(transPairs[1], true, GRAMMAR_TRANSLATION_PAIRS));
+    if (transPairs[2]) questions.push(createGrammarTranslationQuestion(transPairs[2], false, GRAMMAR_TRANSLATION_PAIRS));
+    if (transPairs[3]) questions.push(createGrammarTranslationQuestion(transPairs[3], false, GRAMMAR_TRANSLATION_PAIRS));
+
+    const tenseList = shuffleArray(GRAMMAR_TENSES).slice(0, 3);
+    tenseList.forEach(tense => {
+        const pair = pickUniquePair(grammarTensePools[tense], grammarTenseCursors[tense], used);
+        if (pair) questions.push(createGrammarTenseQuestion(pair, true));
+    });
+
+    const voiceActivePair = pickUniquePair(grammarActivePairs, grammarActiveCursor, used);
+    const voicePassivePair = pickUniquePair(grammarPassivePairs, grammarPassiveCursor, used);
+    const thirdFromActive = i % 2 === 0;
+    const voiceThirdPair = pickUniquePair(
+        thirdFromActive ? grammarActivePairs : grammarPassivePairs,
+        thirdFromActive ? grammarActiveCursor : grammarPassiveCursor,
+        used
+    );
+
+    if (voiceActivePair) questions.push(createGrammarVoiceQuestion(voiceActivePair, true));
+    if (voicePassivePair) questions.push(createGrammarVoiceQuestion(voicePassivePair, true));
+    if (voiceThirdPair) questions.push(createGrammarVoiceQuestion(voiceThirdPair, true));
+
+    grammarTranslationExercises.push({
+        id: `gram-${i + 1}`,
+        title: `Voice + Tense Translation ${i + 1} (${GRAMMAR_TRANSLATION_DIFFICULTY})`,
+        questions: questions.slice(0, GRAMMAR_TRANSLATION_QUESTIONS_PER_EXERCISE).sort(() => Math.random() - 0.5),
+        completed: false,
+        bestScore: 0
+    });
+}
+
 // --- App State ---
-let currentMode = 'identify'; // 'identify', 'fill', 'voice', or 'translate'
+let currentMode = 'identify'; // 'identify', 'fill', 'voice', 'translate', or 'grammar'
 let currentExerciseList = identifyExercises;
 let currentExerciseIndex = -1;
 let currentQuestionIndex = 0;
@@ -755,6 +940,7 @@ function initApp() {
             else if (currentMode === 'fill') currentExerciseList = fillExercises;
             else if (currentMode === 'voice') currentExerciseList = voiceExercises;
             else if (currentMode === 'translate') currentExerciseList = translationExercises;
+            else if (currentMode === 'grammar') currentExerciseList = grammarTranslationExercises;
 
             renderHome();
         });
