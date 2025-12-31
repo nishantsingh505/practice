@@ -495,7 +495,8 @@ const TRANSLATION_PAIRS = [
     { hi: "मुझे यह जगह पसंद है।", en: "I like this place." }
 ];
 
-const TRANSLATION_DIFFICULTY = "Hard";
+const TRANSLATION_DIFFICULTY = "Extra Hard";
+const TRANSLATION_OPTION_COUNT = 6;
 
 function normalizeTranslationText(text) {
     return text
@@ -521,6 +522,7 @@ function countOverlap(aTokens, bTokens) {
 function buildTranslationOptions(pairs, isHiToEn, correct) {
     const pool = pairs.map(pair => (isHiToEn ? pair.en : pair.hi));
     const correctTokens = tokenizeTranslationText(correct);
+    const optionCount = Math.max(3, TRANSLATION_OPTION_COUNT - 1);
 
     const scored = pool
         .filter(option => option !== correct)
@@ -538,12 +540,13 @@ function buildTranslationOptions(pairs, isHiToEn, correct) {
             return Math.random() - 0.5;
         });
 
-    const withOverlap = scored.filter(item => item.overlap > 0);
-    const candidatePool = (withOverlap.length >= 3 ? withOverlap : scored)
-        .slice(0, 12)
+    const minOverlap = Math.max(1, Math.floor(correctTokens.length / 3));
+    const withOverlap = scored.filter(item => item.overlap >= minOverlap);
+    const candidatePool = (withOverlap.length >= optionCount ? withOverlap : scored)
+        .slice(0, Math.max(optionCount * 2, 10))
         .map(item => item.option);
 
-    const options = candidatePool.sort(() => Math.random() - 0.5).slice(0, 3);
+    const options = candidatePool.slice(0, optionCount);
     return [correct, ...options].sort(() => Math.random() - 0.5);
 }
 
