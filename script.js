@@ -495,7 +495,7 @@ const TRANSLATION_PAIRS = [
     { hi: "मुझे यह जगह पसंद है।", en: "I like this place." }
 ];
 
-const TRANSLATION_DIFFICULTY = "Medium";
+const TRANSLATION_DIFFICULTY = "Hard";
 
 function normalizeTranslationText(text) {
     return text
@@ -547,6 +547,16 @@ function buildTranslationOptions(pairs, isHiToEn, correct) {
     return [correct, ...options].sort(() => Math.random() - 0.5);
 }
 
+function getUniqueTranslationPairs(pairs) {
+    const seen = new Set();
+    return pairs.filter(pair => {
+        const key = `${pair.hi}|${pair.en}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
 function createTranslationQuestion(pair, isHiToEn, pairs) {
     const prompt = isHiToEn ? pair.hi : pair.en;
     const correct = isHiToEn ? pair.en : pair.hi;
@@ -562,14 +572,17 @@ function createTranslationQuestion(pair, isHiToEn, pairs) {
     };
 }
 
-const TRANSLATION_EXERCISE_COUNT = 10;
+const TRANSLATION_EXERCISE_COUNT = 8;
 const TRANSLATION_QUESTIONS_PER_EXERCISE = 10;
 const TRANSLATION_DIRECTION_SPLIT = TRANSLATION_QUESTIONS_PER_EXERCISE / 2;
 const totalPerDirection = TRANSLATION_EXERCISE_COUNT * TRANSLATION_DIRECTION_SPLIT;
 
 const shuffledPairs = [...TRANSLATION_PAIRS].sort(() => Math.random() - 0.5);
-const hiToEnPairs = shuffledPairs.slice(0, totalPerDirection);
-const enToHiPairs = shuffledPairs.slice(totalPerDirection, totalPerDirection * 2);
+const uniquePairs = getUniqueTranslationPairs(shuffledPairs);
+const totalPairsNeeded = totalPerDirection * 2;
+const selectedPairs = uniquePairs.slice(0, totalPairsNeeded);
+const hiToEnPairs = selectedPairs.slice(0, totalPerDirection);
+const enToHiPairs = selectedPairs.slice(totalPerDirection, totalPairsNeeded);
 
 const hiToEnQuestions = hiToEnPairs.map(pair => createTranslationQuestion(pair, true, TRANSLATION_PAIRS));
 const enToHiQuestions = enToHiPairs.map(pair => createTranslationQuestion(pair, false, TRANSLATION_PAIRS));
