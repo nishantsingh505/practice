@@ -390,8 +390,209 @@ for (let i = 0; i < 10; i++) {
     });
 }
 
+// --- Translation Mode Data ---
+
+const TRANSLATION_PAIRS = [
+    { hi: "मैं बाजार जा रहा हूँ।", en: "I am going to the market." },
+    { hi: "वह एक किताब पढ़ रही है।", en: "She is reading a book." },
+    { hi: "हम कल मिलेंगे।", en: "We will meet tomorrow." },
+    { hi: "उसने अपना गृहकार्य पूरा कर लिया है।", en: "He has finished his homework." },
+    { hi: "वे पार्क में खेल रहे हैं।", en: "They are playing in the park." },
+    { hi: "सूरज पूर्व से उगता है।", en: "The sun rises in the east." },
+    { hi: "मुझे चाय पसंद है।", en: "I like tea." },
+    { hi: "आज ट्रेन देर से है।", en: "The train is late today." },
+    { hi: "खिड़की खोलो।", en: "Open the window." },
+    { hi: "कृपया दरवाजा बंद करो।", en: "Please close the door." },
+    { hi: "वह अंग्रेज़ी बोल सकती है।", en: "She can speak English." },
+    { hi: "मुझे यह समझ नहीं आता।", en: "I don't understand this." },
+    { hi: "वह मुझसे लंबा है।", en: "He is taller than me." },
+    { hi: "हम एक घंटे से इंतज़ार कर रहे हैं।", en: "We have been waiting for an hour." },
+    { hi: "खाना स्वादिष्ट था।", en: "The food was delicious." },
+    { hi: "सबसे नज़दीकी अस्पताल कहाँ है?", en: "Where is the nearest hospital?" },
+    { hi: "मैं तुम्हें बाद में फोन करूंगा।", en: "I will call you later." },
+    { hi: "वह कल स्कूल गई थी।", en: "She went to school yesterday." },
+    { hi: "क्या आपको थोड़ा पानी चाहिए?", en: "Do you want some water?" },
+    { hi: "बच्चा सो रहा है।", en: "The baby is sleeping." },
+    { hi: "तेज़ बारिश हो रही है।", en: "It is raining heavily." },
+    { hi: "उसका जन्म दिल्ली में हुआ था।", en: "He was born in Delhi." },
+    { hi: "मैंने अपनी चाबियाँ खो दी हैं।", en: "I have lost my keys." },
+    { hi: "कृपया मेरी मदद करें।", en: "Please help me." },
+    { hi: "हम हिंदी सीख रहे हैं।", en: "We are learning Hindi." },
+    { hi: "फिल्म सात बजे शुरू होती है।", en: "The movie starts at seven." },
+    { hi: "वह रात का खाना बना रही है।", en: "She is cooking dinner." },
+    { hi: "यह सड़क बहुत व्यस्त है।", en: "This road is very busy." },
+    { hi: "मुझे नया फोन खरीदना है।", en: "I need to buy a new phone." },
+    { hi: "उसे तीखा खाना पसंद नहीं है।", en: "He doesn't like spicy food." },
+    { hi: "मेरा भाई मुंबई में रहता है।", en: "My brother lives in Mumbai." },
+    { hi: "क्या आप वह फिर से कह सकते हैं?", en: "Can you repeat that?" },
+    { hi: "कक्षा शुरू हो चुकी है।", en: "The class has started." },
+    { hi: "मुझे ठंड लग रही है।", en: "I am feeling cold." },
+    { hi: "उसकी आवाज़ बहुत सुंदर है।", en: "She has a beautiful voice." },
+    { hi: "हमें समय पर होना चाहिए।", en: "We must be on time." },
+    { hi: "कंप्यूटर में समस्या है।", en: "There is a problem with the computer." },
+    { hi: "वह नौकरी ढूंढ रहा है।", en: "He is looking for a job." },
+    { hi: "आज दुकान बंद है।", en: "The shop is closed today." },
+    { hi: "मैं आपका नाम भूल गया।", en: "I forgot your name." },
+    { hi: "कृपया यहाँ बैठिए।", en: "Please sit here." },
+    { hi: "बच्चा कुत्ते से डरता है।", en: "The child is afraid of the dog." },
+    { hi: "हमारे पास पर्याप्त समय है।", en: "We have enough time." },
+    { hi: "आज मौसम अच्छा है।", en: "The weather is nice today." },
+    { hi: "वह कॉफी पी रहा है।", en: "He is drinking coffee." },
+    { hi: "वह जल्द ही पहुंचेगी।", en: "She will arrive soon." },
+    { hi: "मैं तैर सकता हूँ।", en: "I can swim." },
+    { hi: "कृपया अपना नाम लिखें।", en: "Please write your name." },
+    { hi: "बस में भीड़ है।", en: "The bus is crowded." },
+    { hi: "मैं आज थका हुआ हूँ।", en: "I am tired today." },
+    { hi: "क्या तुमने खाना खा लिया?", en: "Have you eaten?" },
+    { hi: "वह अभी ऑफिस में है।", en: "He is at the office right now." },
+    { hi: "मुझे संगीत सुनना पसंद है।", en: "I like listening to music." },
+    { hi: "हमने टिकट पहले ही खरीद लिए हैं।", en: "We have already bought the tickets." },
+    { hi: "वह बस का इंतज़ार कर रही है।", en: "She is waiting for the bus." },
+    { hi: "कृपया लाइट बंद कर दें।", en: "Please turn off the light." },
+    { hi: "यह मेरी पहली यात्रा है।", en: "This is my first trip." },
+    { hi: "क्या आप मेरी बात सुन रहे हैं?", en: "Are you listening to me?" },
+    { hi: "ट्रेन प्लेटफॉर्म नंबर तीन पर आएगी।", en: "The train will arrive at platform three." },
+    { hi: "मुझे सिरदर्द हो रहा है।", en: "I have a headache." },
+    { hi: "वह रोज़ सुबह दौड़ता है।", en: "He runs every morning." },
+    { hi: "बच्चे स्कूल से लौट रहे हैं।", en: "The children are returning from school." },
+    { hi: "क्या मैं आपकी मदद कर सकता हूँ?", en: "Can I help you?" },
+    { hi: "हमें होटल की बुकिंग करनी है।", en: "We need to book the hotel." },
+    { hi: "उसने अपनी गलती स्वीकार की।", en: "She admitted her mistake." },
+    { hi: "कमरे में बहुत अंधेरा है।", en: "The room is very dark." },
+    { hi: "मुझे यह रंग पसंद नहीं है।", en: "I don't like this color." },
+    { hi: "वह गणित में अच्छा है।", en: "He is good at math." },
+    { hi: "हमने रास्ता बदल दिया।", en: "We changed the route." },
+    { hi: "आज मेरी छुट्टी है।", en: "Today is my day off." },
+    { hi: "कृपया धीरे बोलिए।", en: "Please speak slowly." },
+    { hi: "मुझे भूख लगी है।", en: "I am hungry." },
+    { hi: "वह फोटो खींच रहा है।", en: "He is taking a photo." },
+    { hi: "क्या आप चाय या कॉफी चाहेंगे?", en: "Would you like tea or coffee?" },
+    { hi: "मैंने कल नई फिल्म देखी।", en: "I watched a new movie yesterday." },
+    { hi: "दुकान नौ बजे खुलती है।", en: "The shop opens at nine." },
+    { hi: "हमें नए नियम सीखने होंगे।", en: "We will have to learn the new rules." },
+    { hi: "उसने मुझे एक उपहार दिया।", en: "She gave me a gift." },
+    { hi: "यह किताब बहुत रोचक है।", en: "This book is very interesting." },
+    { hi: "मेरी बस छूट गई।", en: "I missed my bus." },
+    { hi: "क्या मौसम कल अच्छा होगा?", en: "Will the weather be good tomorrow?" },
+    { hi: "वह घर पर नहीं है।", en: "She is not at home." },
+    { hi: "मुझे अपना पासपोर्ट ढूंढना है।", en: "I need to find my passport." },
+    { hi: "हम रविवार को यात्रा करेंगे।", en: "We will travel on Sunday." },
+    { hi: "वह सब्ज़ियाँ काट रही है।", en: "She is chopping vegetables." },
+    { hi: "बच्चे मैदान में दौड़ रहे हैं।", en: "The children are running in the field." },
+    { hi: "क्या यह सीट खाली है?", en: "Is this seat empty?" },
+    { hi: "मैं आज जल्दी सो जाऊँगा।", en: "I will sleep early today." },
+    { hi: "मुझे परीक्षा की चिंता है।", en: "I am worried about the exam." },
+    { hi: "उसने दरवाजा खोल दिया।", en: "He opened the door." },
+    { hi: "मैंने कक्षा में सवाल पूछा।", en: "I asked a question in class." },
+    { hi: "क्या आप मुझे रास्ता बता सकते हैं?", en: "Can you show me the way?" },
+    { hi: "उसने सफर रद्द कर दिया।", en: "She canceled the trip." },
+    { hi: "हमें एक नया शिक्षक मिला है।", en: "We have a new teacher." },
+    { hi: "यह काम आसान नहीं है।", en: "This task is not easy." },
+    { hi: "आज बहुत गर्मी है।", en: "It is very hot today." },
+    { hi: "मैंने अपना बैग घर पर छोड़ दिया।", en: "I left my bag at home." },
+    { hi: "क्या तुम्हें मेरी बात याद है?", en: "Do you remember what I said?" },
+    { hi: "वह जल्दी सीखता है।", en: "He learns quickly." },
+    { hi: "मुझे यह जगह पसंद है।", en: "I like this place." }
+];
+
+const TRANSLATION_DIFFICULTY = "Medium";
+
+function normalizeTranslationText(text) {
+    return text
+        .toLowerCase()
+        .replace(/[.,!?;:"'(){}\[\]-]/g, '')
+        .replace(/\u0964/g, '')
+        .trim();
+}
+
+function tokenizeTranslationText(text) {
+    return normalizeTranslationText(text).split(/\s+/).filter(Boolean);
+}
+
+function countOverlap(aTokens, bTokens) {
+    const bSet = new Set(bTokens);
+    let overlap = 0;
+    aTokens.forEach(token => {
+        if (bSet.has(token)) overlap++;
+    });
+    return overlap;
+}
+
+function buildTranslationOptions(pairs, isHiToEn, correct) {
+    const pool = pairs.map(pair => (isHiToEn ? pair.en : pair.hi));
+    const correctTokens = tokenizeTranslationText(correct);
+
+    const scored = pool
+        .filter(option => option !== correct)
+        .map(option => {
+            const optionTokens = tokenizeTranslationText(option);
+            return {
+                option,
+                overlap: countOverlap(correctTokens, optionTokens),
+                lengthDiff: Math.abs(optionTokens.length - correctTokens.length)
+            };
+        })
+        .sort((a, b) => {
+            if (b.overlap !== a.overlap) return b.overlap - a.overlap;
+            if (a.lengthDiff !== b.lengthDiff) return a.lengthDiff - b.lengthDiff;
+            return Math.random() - 0.5;
+        });
+
+    const withOverlap = scored.filter(item => item.overlap > 0);
+    const candidatePool = (withOverlap.length >= 3 ? withOverlap : scored)
+        .slice(0, 12)
+        .map(item => item.option);
+
+    const options = candidatePool.sort(() => Math.random() - 0.5).slice(0, 3);
+    return [correct, ...options].sort(() => Math.random() - 0.5);
+}
+
+function createTranslationQuestion(pair, isHiToEn, pairs) {
+    const prompt = isHiToEn ? pair.hi : pair.en;
+    const correct = isHiToEn ? pair.en : pair.hi;
+
+    return {
+        sentence: prompt,
+        correctAnswer: correct,
+        options: buildTranslationOptions(pairs, isHiToEn, correct),
+        instruction: isHiToEn
+            ? `Choose the correct English translation (${TRANSLATION_DIFFICULTY})`
+            : `Choose the correct Hindi translation (${TRANSLATION_DIFFICULTY})`,
+        type: "translate"
+    };
+}
+
+const TRANSLATION_EXERCISE_COUNT = 10;
+const TRANSLATION_QUESTIONS_PER_EXERCISE = 10;
+const TRANSLATION_DIRECTION_SPLIT = TRANSLATION_QUESTIONS_PER_EXERCISE / 2;
+const totalPerDirection = TRANSLATION_EXERCISE_COUNT * TRANSLATION_DIRECTION_SPLIT;
+
+const shuffledPairs = [...TRANSLATION_PAIRS].sort(() => Math.random() - 0.5);
+const hiToEnPairs = shuffledPairs.slice(0, totalPerDirection);
+const enToHiPairs = shuffledPairs.slice(totalPerDirection, totalPerDirection * 2);
+
+const hiToEnQuestions = hiToEnPairs.map(pair => createTranslationQuestion(pair, true, TRANSLATION_PAIRS));
+const enToHiQuestions = enToHiPairs.map(pair => createTranslationQuestion(pair, false, TRANSLATION_PAIRS));
+
+const translationExercises = [];
+for (let i = 0; i < TRANSLATION_EXERCISE_COUNT; i++) {
+    const start = i * TRANSLATION_DIRECTION_SPLIT;
+    const questions = [
+        ...hiToEnQuestions.slice(start, start + TRANSLATION_DIRECTION_SPLIT),
+        ...enToHiQuestions.slice(start, start + TRANSLATION_DIRECTION_SPLIT)
+    ].sort(() => Math.random() - 0.5);
+
+    translationExercises.push({
+        id: `trans-${i + 1}`,
+        title: `Translation Mix ${i + 1} (${TRANSLATION_DIFFICULTY})`,
+        questions: questions,
+        completed: false,
+        bestScore: 0
+    });
+}
+
 // --- App State ---
-let currentMode = 'identify'; // 'identify' or 'fill'
+let currentMode = 'identify'; // 'identify', 'fill', 'voice', or 'translate'
 let currentExerciseList = identifyExercises;
 let currentExerciseIndex = -1;
 let currentQuestionIndex = 0;
@@ -537,6 +738,7 @@ function initApp() {
             if (currentMode === 'identify') currentExerciseList = identifyExercises;
             else if (currentMode === 'fill') currentExerciseList = fillExercises;
             else if (currentMode === 'voice') currentExerciseList = voiceExercises;
+            else if (currentMode === 'translate') currentExerciseList = translationExercises;
 
             renderHome();
         });
